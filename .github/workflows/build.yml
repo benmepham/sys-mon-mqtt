@@ -1,0 +1,36 @@
+name: build
+
+# Every push to main rebuilds the binaries on the rolling "latest" release.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - name: Build
+        run: |
+          build() {
+            CGO_ENABLED=0 GOOS=linux GOARCH=$1 GOARM=$2 go build -ldflags "-s -w" -o dist/sys-mon-mqtt-linux-$3 .
+          }
+          build amd64 "" amd64
+          build arm64 "" arm64
+          build arm 7 armv7
+          build arm 6 armv6
+      - name: Publish to latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f latest
+          git push -f origin latest
+          gh release view latest >/dev/null 2>&1 || gh release create latest --prerelease --title latest --notes "Built from main on every push"
+          gh release upload latest dist/* --clobber

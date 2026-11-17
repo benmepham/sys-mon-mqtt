@@ -1,0 +1,35 @@
+mqtt:
+  hostname: 127.0.0.1
+  port: 1883        # defaults to 1883
+  user: test
+  password: test
+tls:
+  ca_certs:         # set to enable TLS
+  certfile:         # optional client certificate
+  keyfile:
+deviceName: test
+client_id: test
+ha_status: hass     # defaults to hass
+update_interval: 60 # seconds, defaults to 60
+sensors:            # all on by default; set false to disable
+  temperature: true
+  clock_speed: true
+  disk_use: true
+  memory_use: true
+  cpu_usage: true
+  load_1m: true
+  load_5m: true
+  load_15m: true
+  swap_usage: true
+  last_boot: true
+  hostname: true
+  host_ip: true
+  host_os: true
+  host_arch: true
+  last_message: true
+  updates: true
+  external_drives:
+    # Mounted drives, e.g.:
+    # Drive1: /media/storage
+    # ZFS pools use the pool name:
+    # pool-name: /mount-point

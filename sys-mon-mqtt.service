@@ -1,0 +1,13 @@
+[Unit]
+Description=Publish system sensors to MQTT for Home Assistant
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=pi
+ExecStart=/usr/local/bin/sys-mon-mqtt /etc/sys-mon-mqtt/settings.yaml
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
