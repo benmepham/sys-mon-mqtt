@@ -29,7 +29,7 @@ The Python `settings.yaml` format works as is. See `settings_example.yaml`. Unsu
 
 ## Build
 
-Go is pinned with [mise](https://mise.jdx.dev) in `mise.toml`.
+Go is installed with [mise](https://mise.jdx.dev) (`mise.toml` tracks latest; `go.mod` sets the minimum).
 
 ```sh
 mise install
