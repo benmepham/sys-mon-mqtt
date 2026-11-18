@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,11 +24,6 @@ type Config struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 	} `yaml:"mqtt"`
-	TLS struct {
-		CACerts  string `yaml:"ca_certs"`
-		CertFile string `yaml:"certfile"`
-		KeyFile  string `yaml:"keyfile"`
-	} `yaml:"tls"`
 	DeviceName     string         `yaml:"devicename"`
 	ClientID       string         `yaml:"client_id"`
 	HAStatus       string         `yaml:"ha_status"`
@@ -56,12 +49,8 @@ func main() {
 	// Wakes the main loop to publish state right after (re)connecting
 	refresh := make(chan struct{}, 1)
 
-	scheme := "tcp"
-	if cfg.TLS.CACerts != "" {
-		scheme = "ssl"
-	}
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("%s://%s:%d", scheme, cfg.MQTT.Hostname, cfg.MQTT.Port))
+	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", cfg.MQTT.Hostname, cfg.MQTT.Port))
 	opts.SetClientID(cfg.ClientID)
 	opts.SetUsername(cfg.MQTT.User)
 	opts.SetPassword(cfg.MQTT.Password)
@@ -69,13 +58,6 @@ func main() {
 	opts.SetAutoReconnect(true)
 	opts.SetConnectRetry(true)
 	opts.SetMaxReconnectInterval(time.Minute)
-	if cfg.TLS.CACerts != "" {
-		tlsConfig, err := loadTLS(cfg)
-		if err != nil {
-			log.Fatal(err)
-		}
-		opts.SetTLSConfig(tlsConfig)
-	}
 	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
 		log.Printf("connection lost: %v", err)
 	})
@@ -154,26 +136,6 @@ func loadConfig(path string) (Config, error) {
 		return cfg, errors.New("settings need mqtt.hostname, deviceName and client_id")
 	}
 	return cfg, nil
-}
-
-func loadTLS(cfg Config) (*tls.Config, error) {
-	ca, err := os.ReadFile(cfg.TLS.CACerts)
-	if err != nil {
-		return nil, err
-	}
-	pool := x509.NewCertPool()
-	if !pool.AppendCertsFromPEM(ca) {
-		return nil, errors.New("no certificates found in " + cfg.TLS.CACerts)
-	}
-	tlsConfig := &tls.Config{RootCAs: pool}
-	if cfg.TLS.CertFile != "" && cfg.TLS.KeyFile != "" {
-		cert, err := tls.LoadX509KeyPair(cfg.TLS.CertFile, cfg.TLS.KeyFile)
-		if err != nil {
-			return nil, err
-		}
-		tlsConfig.Certificates = []tls.Certificate{cert}
-	}
-	return tlsConfig, nil
 }
 
 // publishState reads every sensor and publishes one JSON payload. Failed sensors are left out.

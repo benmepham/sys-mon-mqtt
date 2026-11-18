@@ -33,10 +33,10 @@ Go is pinned with [mise](https://mise.jdx.dev) in `mise.toml`.
 
 ```sh
 mise install
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 mise exec -- go build -ldflags "-s -w" -o sys-mon-mqtt-linux-amd64 .
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 mise exec -- go build -ldflags "-s -w" -o sys-mon-mqtt-linux-arm64 .
-CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 mise exec -- go build -ldflags "-s -w" -o sys-mon-mqtt-linux-armv7 .
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 mise exec -- go build -ldflags "-s -w" -o sys-mon-mqtt .
 ```
+
+Other targets: `GOARCH=arm64`, or `GOARCH=arm GOARM=7` / `GOARM=6` for 32-bit Pis.
 
 ## Test with a local mosquitto
 

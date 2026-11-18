@@ -3,10 +3,6 @@ mqtt:
   port: 1883        # defaults to 1883
   user: test
   password: test
-tls:
-  ca_certs:         # set to enable TLS
-  certfile:         # optional client certificate
-  keyfile:
 deviceName: test
 client_id: test
 ha_status: hass     # defaults to hass

@@ -58,12 +58,6 @@ func buildSensors(cfg Config) []Sensor {
 		if !sensorEnabled(cfg.Sensors, s.Key) {
 			continue
 		}
-		if s.Key == "updates" {
-			if _, err := exec.LookPath("apt-get"); err != nil {
-				log.Printf("apt-get not found, updates sensor disabled")
-				continue
-			}
-		}
 		sensors = append(sensors, s)
 	}
 	return append(sensors, buildDriveSensors(cfg.Sensors)...)
@@ -308,21 +302,9 @@ func isZFS(mountPoint string) bool {
 }
 
 func readZpoolUsage(pool string) (any, error) {
-	zpool, err := exec.LookPath("zpool")
-	if err != nil {
-		for _, path := range []string{"/usr/sbin/zpool", "/sbin/zpool"} {
-			if _, statErr := os.Stat(path); statErr == nil {
-				zpool, err = path, nil
-				break
-			}
-		}
-	}
-	if err != nil {
-		return nil, errors.New("zpool command not found")
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, zpool, "list", "-H", "-p", "-o", "capacity", pool).Output()
+	out, err := exec.CommandContext(ctx, "zpool", "list", "-H", "-p", "-o", "capacity", pool).Output()
 	if err != nil {
 		return nil, fmt.Errorf("zpool list %s: %w", pool, err)
 	}
